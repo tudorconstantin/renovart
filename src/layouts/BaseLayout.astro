@@ -17,9 +17,12 @@ interface Props {
 
 const { title, description = business.defaultDescription } = Astro.props;
 
-// LAY-01: token placeholder, swapped for the real Cloudflare token at launch
-// (tracked on the handoff checklist — this is config, not user-facing copy).
-const CF_BEACON_TOKEN = 'CF_WEB_ANALYTICS_TOKEN_PLACEHOLDER';
+// LAY-01: Cloudflare Web Analytics token, supplied at build time via the
+// PUBLIC_CF_BEACON_TOKEN env var (blank locally; real value set in the GitHub
+// Actions environment at launch — tracked on the handoff checklist). When blank
+// the beacon <script> is NOT emitted, so no spurious requests fire with a
+// placeholder token (WR-01).
+const CF_BEACON_TOKEN = import.meta.env.PUBLIC_CF_BEACON_TOKEN ?? '';
 ---
 
 <!doctype html>
@@ -33,13 +36,16 @@ const CF_BEACON_TOKEN = 'CF_WEB_ANALYTICS_TOKEN_PLACEHOLDER';
 
     <slot name="head" />
 
-    {/* Cloudflare Web Analytics — cookieless beacon stub (token placeholder) */}
-    <script
-      is:inline
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`}
-    ></script>
+    {/* Cloudflare Web Analytics — cookieless beacon. Only emitted when a real
+        token is configured via PUBLIC_CF_BEACON_TOKEN (WR-01). */}
+    {CF_BEACON_TOKEN && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}"}`}
+      ></script>
+    )}
   </head>
   <body>
     <Header />
