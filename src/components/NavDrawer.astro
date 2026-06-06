@@ -191,11 +191,26 @@ const links = [
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-drawer-close]');
 
   if (drawer && toggle && overlay) {
+    // WR-06: overflow:hidden alone does NOT stop iOS Safari touch scrolling
+    // behind the overlay. Also prevent touchmove on everything outside the
+    // drawer (the drawer itself stays scrollable for long menus).
+    const preventScroll = (e: TouchEvent) => {
+      if ((e.target as Element | null)?.closest('#navDrawer')) return;
+      e.preventDefault();
+    };
+    const lockScroll = () => {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+    };
+    const unlockScroll = () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('touchmove', preventScroll);
+    };
     const open = () => {
       drawer.dataset.open = 'true';
       overlay.hidden = false;
       toggle.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
+      lockScroll();
       drawer.querySelector<HTMLElement>('a, button')?.focus();
     };
     const prefersReducedMotion = window.matchMedia(
@@ -204,7 +219,7 @@ const links = [
     const close = () => {
       overlay.hidden = true;
       toggle.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+      unlockScroll();
       toggle.focus();
       // WR-03: animate the exit when motion is welcome, deferring the final
       // display:none to animationend; otherwise hide instantly (no animation
