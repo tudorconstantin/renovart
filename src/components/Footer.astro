@@ -82,7 +82,10 @@ const year = new Date().getFullYear();
 
   .footer__copy {
     margin: var(--space-md) 0 0;
-    color: var(--color-slate-500);
+    /* was: var(--color-slate-500) — 2.82:1 on slate-900, FAILS WCAG AA (CR-01).
+       White at 65% opacity on #0F1B2D ≈ 6.7:1 — PASS, while still reading as
+       de-emphasized meta text. */
+    color: rgba(255, 255, 255, 0.65);
     font-size: 0.875rem;
   }
 
