@@ -24,6 +24,7 @@ const links = [
   id="navDrawer"
   class="drawer"
   aria-label="Navigație principală"
+  aria-modal="true"
   data-open="false"
 >
   <div class="drawer__head">
@@ -189,7 +190,29 @@ const links = [
     overlay.addEventListener('click', close);
     closeBtn?.addEventListener('click', close);
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && drawer.dataset.open === 'true') close();
+      if (drawer.dataset.open !== 'true') return;
+      if (e.key === 'Escape') {
+        close();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      // Focus trap (CR-02 / WCAG 2.1.2): cycle Tab within the drawer's
+      // focusable set so keyboard focus can't escape behind the overlay.
+      const focusables = Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     });
   }
 </script>
