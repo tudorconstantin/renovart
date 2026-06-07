@@ -1,31 +1,100 @@
 ---
-// Contact route — the header "Contact" button lands here. Surfaces the NAP
-// contact affordances from business.ts (D-15) so the page is useful even before
-// the richer Phase 3 contact content lands.
+// Contact route (PAG-04) — the primary conversion endpoint. A focal
+// Sună / WhatsApp / Email CTA cluster (general prefill from business.ts, NOT the
+// careers one) + NAP meta (address, hours, service area). No form element —
+// locked constraint (CONTEXT line 45). Emits a HomeAndConstructionBusiness node
+// (same canonical builder as Home — repeating it on Contact is acceptable per
+// schema.org norms; SEO-03 / CONTEXT line 30). All contact strings flow from the
+// single-source NAP module (business.ts, LAY-05). Reuses BaseLayout + tokens.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { business } from '../data/business';
+import { homeAndConstructionBusiness } from '../data/schema';
+import JsonLd from '../components/JsonLd.astro';
+
+const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness() };
 ---
 
-<BaseLayout title="Contact — Renovart Interiors">
+<BaseLayout
+  title={`Contact — ${business.name}`}
+  description="Contactați-ne pentru renovarea scării de bloc în Cluj-Napoca și împrejurimi: sunați, scrieți-ne pe WhatsApp sau trimiteți un email. Vă răspundem rapid."
+>
+  <JsonLd slot="head" data={node} />
+
   <div class="page">
-    <h1>Contact</h1>
-    <p>Ne puteți contacta direct prin oricare dintre următoarele:</p>
+    <div class="intro">
+      <h1>Contact</h1>
+      <p class="lead">
+        Sunați, scrieți-ne pe WhatsApp sau trimiteți un email — vă răspundem
+        rapid cu un deviz clar pentru renovarea scării dumneavoastră de bloc.
+      </p>
+    </div>
 
-    <ul class="contacts">
-      <li>
-        Telefon: <a href={business.telHref}>{business.phoneDisplay}</a>
-      </li>
-      <li>
-        WhatsApp: <a href={business.whatsappHref}>Scrieți-ne pe WhatsApp</a>
-      </li>
-      <li>
-        Email: <a href={`mailto:${business.email}`}>{business.email}</a>
-      </li>
-    </ul>
+    <div class="cta-cluster">
+      <a
+        class="cta-btn cta-btn--call"
+        href={business.telHref}
+        aria-label={`Sună la ${business.phoneDisplay}`}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M6.6 10.8a15.9 15.9 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.3 11.3 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.3 11.3 0 00.58 3.6 1 1 0 01-.24 1L6.6 10.8z"
+            fill="currentColor"
+          />
+        </svg>
+        <span>Sună</span>
+      </a>
 
-    <p class="meta">{business.address}</p>
-    <p class="meta">Program: {business.hours}</p>
-    <p class="meta">Zonă deservită: {business.serviceArea}</p>
+      <a
+        class="cta-btn cta-btn--wa"
+        href={business.whatsappHref}
+        aria-label="Scrieți-ne pe WhatsApp"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M12 2a10 10 0 00-8.6 15l-1.4 5 5.1-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.4.5c-.2.2-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"
+            fill="currentColor"
+          />
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+
+      <a
+        class="cta-btn cta-btn--email"
+        href={`mailto:${business.email}`}
+        aria-label={`Trimite un email la ${business.email}`}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zm1.4 2L12 12.2 19.6 7H4.4zM20 8.3l-7.4 5.1a1 1 0 01-1.2 0L4 8.3V17h16V8.3z"
+            fill="currentColor"
+          />
+        </svg>
+        <span>Email</span>
+      </a>
+    </div>
+
+    <dl class="nap">
+      <div class="nap__row">
+        <dt>Adresă</dt>
+        <dd>{business.address}</dd>
+      </div>
+      <div class="nap__row">
+        <dt>Program</dt>
+        <dd>{business.hours}</dd>
+      </div>
+      <div class="nap__row">
+        <dt>Zonă deservită</dt>
+        <dd>{business.serviceArea}</dd>
+      </div>
+      <div class="nap__row">
+        <dt>Telefon</dt>
+        <dd><a href={business.telHref}>{business.phoneDisplay}</a></dd>
+      </div>
+      <div class="nap__row">
+        <dt>Email</dt>
+        <dd><a href={`mailto:${business.email}`}>{business.email}</a></dd>
+      </div>
+    </dl>
   </div>
 </BaseLayout>
 
@@ -35,37 +104,126 @@ import { business } from '../data/business';
     margin: 0 auto;
     padding: var(--space-2xl) var(--space-md);
   }
+
+  .intro {
+    margin-bottom: var(--space-xl);
+  }
+
   h1 {
+    font-family: var(--font-display);
     font-size: 1.75rem;
     font-weight: 700;
+    line-height: 1.2;
     color: var(--color-slate-900);
+    margin: 0 0 var(--space-md);
   }
-  p {
+
+  .lead {
+    font-size: 1rem;
     color: var(--color-slate-700);
+    margin: 0;
+    max-width: 60ch;
   }
-  .contacts {
-    list-style: none;
-    margin: var(--space-md) 0;
-    padding: 0;
-  }
-  .contacts li {
-    min-height: 48px;
+
+  .cta-cluster {
     display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+
+  .cta-btn {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-xs);
+    justify-content: center;
+    gap: var(--space-sm);
+    min-height: 56px;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+  }
+
+  .cta-btn--call {
+    background: var(--color-accent);
+    color: var(--color-on-dark);
+  }
+  .cta-btn--call:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .cta-btn--wa {
+    background: var(--color-whatsapp);
+    color: var(--color-on-dark);
+  }
+  .cta-btn--wa:hover {
+    background: var(--color-whatsapp-hover);
+  }
+
+  /* Secondary treatment — slate outline, keeps terracotta scarce. */
+  .cta-btn--email {
+    background: transparent;
+    color: var(--color-slate-900);
+    border: 1px solid var(--color-slate-600);
+  }
+  .cta-btn--email:hover {
+    background: var(--color-surface);
+  }
+
+  .nap {
+    margin: var(--space-2xl) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .nap__row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nap dt {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-slate-500);
+  }
+
+  .nap dd {
+    margin: 0;
     color: var(--color-slate-700);
   }
-  .contacts a {
+
+  .nap a {
     color: var(--color-accent);
     font-weight: 600;
   }
-  .meta {
-    margin: 0;
-    color: var(--color-slate-500);
-  }
+
   @media (min-width: 768px) {
+    .page {
+      padding: var(--space-3xl) var(--space-lg);
+    }
     h1 {
       font-size: 2rem;
+    }
+    .cta-cluster {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    .cta-btn {
+      flex: 1 1 auto;
+    }
+    .nap__row {
+      flex-direction: row;
+      gap: var(--space-md);
+      align-items: baseline;
+    }
+    .nap dt {
+      flex: 0 0 9rem;
     }
   }
 </style>
