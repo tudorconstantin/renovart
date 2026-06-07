@@ -1,0 +1,32 @@
+# robots.txt — Renovart (SEO-07 / D-12)
+# AEO policy: explicitly welcome AI training + citation/search crawlers.
+# Tokens verified against vendor docs 2026-06-07.
+
+# --- Training / data crawlers ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# --- Citation / search crawlers ---
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# --- Everyone else ---
+User-agent: *
+Allow: /
+
+Sitemap: https://nume-firma.ro/sitemap-index.xml
