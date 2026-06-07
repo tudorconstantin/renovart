@@ -1,33 +1,133 @@
 ---
-// Placeholder route (D-09) — the portfolio (lucrari collection + slider) arrives
-// in Phase 2. Exists so the shell nav has no dead links / 404s.
+// /lucrari — responsive portfolio grid (LUC-03, D-02, 02-UI-SPEC §Portfolio grid).
+// Reads the lucrari collection, sorts featured-first then date-descending, and
+// renders one ProjectCard per entry. Empty state shown only when the collection
+// is empty (seed content means this should never show in practice — D-06).
+//
+// NOTE: the `featured` flag established by the schema is used here only for grid
+// ordering. The Phase 3 homepage featured PULL (LUC-06) is OUT OF SCOPE this phase.
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { business } from '../data/business';
+
+const projects = (await getCollection('lucrari')).sort((a, b) => {
+  // featured first
+  if (a.data.featured !== b.data.featured) {
+    return a.data.featured ? -1 : 1;
+  }
+  // then date descending (newest first)
+  return b.data.date.getTime() - a.data.date.getTime();
+});
 ---
 
 <BaseLayout title="Lucrări — Renovart Interiors">
   <div class="page">
-    <h1>Lucrări</h1>
-    <p>Portofoliul cu lucrările noastre (înainte / după) va fi disponibil în curând.</p>
+    <header class="page__head">
+      <h1>Lucrări</h1>
+      <p class="page__intro">
+        Lucrări de renovare a scărilor de bloc, finalizate în Cluj-Napoca și
+        împrejurimi.
+      </p>
+    </header>
+
+    {
+      projects.length > 0 ? (
+        <ul class="grid" role="list">
+          {projects.map((entry) => (
+            <li>
+              <ProjectCard entry={entry} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="empty">
+          <h2 class="empty__heading">Curând adăugăm lucrări aici.</h2>
+          <p class="empty__body">
+            Lucrările noastre finalizate vor apărea în această secțiune. Până
+            atunci, ne puteți contacta direct pentru exemple și referințe.
+          </p>
+          <p class="empty__cta">
+            <a href={business.telHref}>{business.phoneDisplay}</a>
+            {' · '}
+            <a href={business.whatsappHref}>WhatsApp</a>
+          </p>
+        </div>
+      )
+    }
   </div>
 </BaseLayout>
 
 <style>
   .page {
-    max-width: 48rem;
+    max-width: 75rem;
     margin: 0 auto;
     padding: var(--space-2xl) var(--space-md);
   }
+
+  .page__head {
+    margin-bottom: var(--space-xl);
+  }
+
   h1 {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--color-slate-900);
   }
-  p {
+
+  .page__intro {
+    margin: 0;
+    color: var(--color-slate-700);
+    max-width: 60ch;
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .grid > li {
+    display: flex;
+  }
+
+  .grid > li > :global(.card) {
+    width: 100%;
+  }
+
+  .empty {
+    max-width: 60ch;
+  }
+
+  .empty__heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-slate-900);
+  }
+
+  .empty__body {
     color: var(--color-slate-700);
   }
+
+  .empty__cta a {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
   @media (min-width: 768px) {
+    .page {
+      padding: var(--space-2xl) var(--space-lg);
+    }
+
     h1 {
       font-size: 2rem;
+    }
+
+    .grid {
+      gap: var(--space-lg);
     }
   }
 </style>
