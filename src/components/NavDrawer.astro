@@ -21,10 +21,11 @@ const links = [
 {/* Overlay + drawer. Hidden by default; revealed via [data-open="true"]. */}
 <div class="overlay" data-overlay hidden></div>
 
-<nav
+<div
   id="navDrawer"
+  role="dialog"
   class="drawer"
-  aria-label="Navigație principală"
+  aria-label="Meniu de navigație"
   aria-modal="true"
   data-open="false"
 >
@@ -37,20 +38,22 @@ const links = [
     </button>
   </div>
 
-  <ul class="drawer__list">
-    {links.map(({ href, label }) => (
-      <li>
-        <a
-          href={href}
-          class="drawer__link"
-          aria-current={here === href ? 'page' : undefined}
-        >
-          {label}
-        </a>
-      </li>
-    ))}
-  </ul>
-</nav>
+  <nav aria-label="Navigație principală">
+    <ul class="drawer__list">
+      {links.map(({ href, label }) => (
+        <li>
+          <a
+            href={href}
+            class="drawer__link"
+            aria-current={here === href ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</div>
 
 <style>
   .overlay {
