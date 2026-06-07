@@ -1,0 +1,263 @@
+---
+// Project detail page — /lucrari/[slug] (LUC-04, D-03, D-12).
+// 02-UI-SPEC §"Project detail" + 02-RESEARCH §"Pattern 3".
+//
+// Astro 6: render() is a STANDALONE import from 'astro:content' (NOT entry.render()
+// — that method is removed for glob-loader collections; RESEARCH Pitfall 1).
+// getStaticPaths maps params.slug = entry.id (glob derives id from the dir name).
+//
+// Conditional media render (D-12): a project with index-aligned before/after pairs
+// shows the slider; an after-only project (the real D-11 project) shows an accessible
+// mixed-orientation gallery. A broken/empty slider is NEVER rendered.
+//
+// Breadcrumb is BreadcrumbList-READY DOM only — the JSON-LD <script> is Phase 3
+// (SEO-05); do NOT emit application/ld+json here.
+import { getCollection, render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BeforeAfter from '../../components/BeforeAfter.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('lucrari');
+  return entries.map((entry) => ({
+    params: { slug: entry.id }, // param name matches the [slug].astro filename
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry); // Astro 6 standalone render() → MDX body
+const { title, location, date, beforeImages, afterImages } = entry.data;
+
+const dateLabel = new Intl.DateTimeFormat('ro-RO', {
+  year: 'numeric',
+  month: 'long',
+}).format(date);
+
+// D-12: slider ONLY when aligned before/after pairs exist; else gallery.
+const hasPairs =
+  Array.isArray(beforeImages) &&
+  beforeImages.length > 0 &&
+  beforeImages.length === afterImages.length;
+
+// Factual ro-RO alt texts for the real D-11 gallery photos, keyed by filename
+// (02-UI-SPEC §Gallery alt-text guidance — describe what the photos actually show,
+// no invented specifics). Falls back to "{title} — fotografie {n}" for extras.
+const GALLERY_ALT: Record<string, string> = {
+  'trepte-bordo': 'Trepte renovate cu finisaj bordo și mână curentă vopsită',
+  'palier-vopsit': 'Palier proaspăt vopsit, pereți și tavan în alb',
+  'lambriu-vertical': 'Panou decorativ vertical din lambriu pe palier',
+  'usi-acces': 'Zona ușilor de acces la apartamente, după renovare',
+  'corp-iluminat': 'Corp de iluminat montat pe tavanul renovat',
+};
+
+const galleryAlt = (img: { src: string }, i: number): string => {
+  // <Picture> src points at the optimized asset; the original filename stem is
+  // embedded in it (e.g. ".../trepte-bordo.<hash>.webp"). Match on the stem.
+  for (const [key, alt] of Object.entries(GALLERY_ALT)) {
+    if (img.src.includes(key)) return alt;
+  }
+  return `${title} — fotografie ${i + 1}`;
+};
+---
+
+<BaseLayout title={`${title} — Renovart Interiors`}>
+  <article class="detail">
+    {/* BreadcrumbList-ready DOM (D-03). No JSON-LD here — deferred to Phase 3. */}
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol>
+        <li><a href="/">Acasă</a></li>
+        <li><a href="/lucrari">Lucrări</a></li>
+        <li aria-current="page">{title}</li>
+      </ol>
+    </nav>
+
+    <h1 class="detail__title">{title}</h1>
+    <p class="detail__meta">{location} · {dateLabel}</p>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      hasPairs ? (
+        <section class="media media--pairs" aria-label="Comparație înainte și după">
+          {beforeImages!.map((before, i) => {
+            // hasPairs guarantees an aligned after for every before; the explicit
+            // guard satisfies noUncheckedIndexedAccess and is defence-in-depth.
+            const after = afterImages[i];
+            return after ? <BeforeAfter before={before} after={after} /> : null;
+          })}
+        </section>
+      ) : (
+        <ul class="gallery" aria-label="Galerie foto — lucrarea finalizată">
+          {afterImages.map((img, i) => (
+            <li class="gallery__item">
+              <Picture
+                src={img}
+                formats={['avif', 'webp']}
+                widths={[400, 800, 1200]}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                alt={galleryAlt(img, i)}
+              />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .detail {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  @media (min-width: 768px) {
+    .detail {
+      padding: var(--space-2xl) var(--space-lg);
+    }
+  }
+
+  /* ─── Breadcrumb ─────────────────────────────────────────────────────────── */
+  .crumbs ol {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    margin: 0 0 var(--space-md);
+    padding: 0;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .crumbs li {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Separator between crumbs. */
+  .crumbs li + li::before {
+    content: '›';
+    margin: 0 var(--space-xs);
+    color: var(--color-slate-500);
+    font-weight: 400;
+  }
+
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px; /* ≥48px hit area (WCAG 2.5.5) */
+    color: var(--color-slate-700);
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .crumbs [aria-current='page'] {
+    color: var(--color-slate-500);
+  }
+
+  /* ─── Header ─────────────────────────────────────────────────────────────── */
+  .detail__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.2;
+    color: var(--color-slate-900);
+    margin: 0 0 var(--space-xs);
+  }
+
+  @media (min-width: 768px) {
+    .detail__title {
+      font-size: 2rem;
+    }
+  }
+
+  .detail__meta {
+    margin: 0 0 var(--space-xl);
+    color: var(--color-slate-700);
+    font-size: 1rem;
+  }
+
+  /* ─── MDX prose ──────────────────────────────────────────────────────────── */
+  .prose {
+    max-width: 70ch;
+    color: var(--color-slate-700);
+    margin-bottom: var(--space-xl);
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 var(--space-md);
+    line-height: 1.5;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: var(--space-lg);
+  }
+
+  .prose :global(li) {
+    margin-bottom: var(--space-sm);
+  }
+
+  .prose :global(strong) {
+    color: var(--color-slate-900);
+  }
+
+  @media (min-width: 768px) {
+    .detail__meta,
+    .prose {
+      margin-bottom: var(--space-2xl);
+    }
+  }
+
+  /* ─── Media region (full content-width) ──────────────────────────────────── */
+  .media--pairs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  /* ─── Gallery (after-only, mixed-orientation — Pitfall 6) ────────────────── */
+  .gallery {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    /* Tolerate uneven row heights so mixed portrait/landscape never crop badly. */
+    align-items: start;
+  }
+
+  @media (min-width: 768px) {
+    .gallery {
+      gap: var(--space-lg);
+    }
+  }
+
+  .gallery__item {
+    border: 1px solid var(--color-slate-600);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  /* Each image keeps its OWN intrinsic aspect-ratio (no forced box → no crop). */
+  .gallery__item :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>
