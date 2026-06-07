@@ -62,6 +62,7 @@ export function homeAndConstructionBusiness() {
 export function serviceSchema(services: readonly Service[]) {
   return {
     '@type': 'Service',
+    name: 'Renovarea scărilor de bloc',
     serviceType: 'Renovarea scărilor de bloc',
     provider: { '@id': BIZ_ID },
     areaServed: { '@type': 'City', name: 'Cluj-Napoca' },

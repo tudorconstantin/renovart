@@ -7,8 +7,10 @@
 // here ONLY because `data` is trusted, build-time, project-owned content
 // (business.ts / faq.ts / services.ts) — NEVER user/request input. JSON.stringify
 // provides JSON escaping (", \, control chars); ro-RO diacritics (ă â î ș ț) pass
-// through as valid UTF-8 string content. The `.replace(/</g, '<')` hardens
-// against a literal "</script>" ever appearing in copy (defense-in-depth).
+// through as valid UTF-8 string content. The `.replace(/</g, '\\u003c')` below
+// escapes every "<" to its < JSON unicode form, so a literal "</script>" can
+// never break out of the block even if it appears in copy (defense-in-depth).
+// Do NOT weaken this to a no-op replacement — it is the breakout guard (WR-03).
 // `is:inline` keeps Astro from bundling/optimizing the block — it is content,
 // not executable JS.
 interface Props {

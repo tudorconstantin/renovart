@@ -52,7 +52,26 @@ has('dist/index.html', 'HomeAndConstructionBusiness');
 has('dist/index.html', 'FAQPage');
 has('dist/index.html', 'twitter:card');
 has('dist/contact/index.html', 'HomeAndConstructionBusiness');
-has('dist/servicii/index.html', '"@type":"Service"');
+
+// Servicii: structurally assert the TOP-LEVEL provider-carrying Service node shipped
+// (a plain '"@type":"Service"' substring also matches the nested itemOffered offers,
+// so it could pass even if the real Service node were missing — WR-01).
+const serviciiFile = 'dist/servicii/index.html';
+if (!existsSync(serviciiFile)) fail(`${serviciiFile} missing`);
+const flatten = (node) =>
+  Array.isArray(node) ? node.flatMap(flatten) : node && node['@graph'] ? flatten(node['@graph']) : [node];
+let serviceNodeFound = false;
+{
+  const html = readFileSync(serviciiFile, 'utf8');
+  let m;
+  const sre = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g;
+  while ((m = sre.exec(html)) !== null) {
+    for (const node of flatten(JSON.parse(m[1]))) {
+      if (node && node['@type'] === 'Service' && node.provider) serviceNodeFound = true;
+    }
+  }
+}
+if (!serviceNodeFound) fail(`no top-level Service node with a provider in ${serviciiFile}`);
 
 const detailPages = globSync('dist/lucrari/*/index.html');
 if (detailPages.length === 0) fail('no dist/lucrari/*/index.html detail pages');
