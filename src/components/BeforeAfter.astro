@@ -32,7 +32,7 @@ const {
 } = Astro.props;
 ---
 
-<figure class="ba" data-ba style="--pos: 50%; aspect-ratio: 4 / 3;">
+<figure class="ba" data-ba style="--pos: 50%;">
   {/* BEFORE — bottom layer / left cell in the no-JS fallback */}
   <div class="ba__img ba__before">
     <Picture
@@ -118,6 +118,10 @@ const {
   /* ─── Enhanced (.ba--js): single stacked box + range-driven clip overlay ── */
   .ba--js {
     display: block; /* stop being a 2-col grid; stack the two layers */
+    /* WR-01: reserve 4:3 ONLY in the enhanced stacked box (zero CLS). The no-JS
+       side-by-side fallback keeps each image at its natural/landscape ratio so
+       1600×1200 demo seeds are not crushed into portrait cells. */
+    aspect-ratio: 4 / 3;
   }
 
   .ba--js .ba__img {
