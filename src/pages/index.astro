@@ -1,35 +1,209 @@
 ---
+// / — Home marketing page (PAG-01, LUC-06, COP-01, SEO-01/02/03).
+// The highest-traffic conversion slice: hero value prop + Sună/WhatsApp CTA,
+// services summary, honest trust-stats band, featured before/after projects,
+// a condensed "Cum lucrăm" teaser, the visible FAQ, and a closing CTA.
+//
+// Emits the Home @graph JSON-LD (HomeAndConstructionBusiness + FAQPage) into
+// BaseLayout's <slot name="head" /> via JsonLd. All NAP/contact strings come
+// from business.ts (LAY-05); schema is derived from the same source (no drift).
+// Zero new client-side JS, no form element, tokens-only styles (no new CSS tokens).
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { business } from '../data/business';
+import { business, trust } from '../data/business';
+import { getCollection } from 'astro:content';
+import ProjectCard from '../components/ProjectCard.astro';
+import Faq from '../components/Faq.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { homeAndConstructionBusiness, faqPageSchema } from '../data/schema';
+import { faq } from '../data/faq';
+import { services } from '../data/services';
 
 const title = `${business.name} — Renovarea scărilor de bloc în Cluj-Napoca`;
+const description =
+  'Renovăm scări de bloc în Cluj-Napoca pentru asociații de proprietari și administratori: zugrăveli, trepte, balustrade, instalații electrice. Deviz gratuit, garanție scrisă, plată pe etape. Sunați sau scrieți pe WhatsApp.';
+
+// Featured pull (LUC-06): destructured filter predicate (RESEARCH Pitfall 1),
+// newest first, max 4. Today this renders 2 real cards.
+const featured = (await getCollection('lucrari', ({ data }) => data.featured))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 4);
+
+// Home @graph — @context ONCE at the root, not on each node.
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [homeAndConstructionBusiness(), faqPageSchema(faq)],
+};
+
+// "Cum lucrăm" condensed teaser steps (full process lives on /despre).
+const steps = [
+  { name: 'Evaluare și deviz', text: 'Venim la fața locului, măsurăm și întocmim un deviz clar și gratuit.' },
+  { name: 'Planificare', text: 'Stabilim etapele și termenele, agreate cu asociația dinainte.' },
+  { name: 'Execuție', text: 'Lucrăm organizat, cu accesul locatarilor afectat cât mai puțin.' },
+  { name: 'Predare și garanție', text: 'Predăm lucrarea cu proces-verbal și garanție scrisă.' },
+];
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description={description}>
+  <JsonLd slot="head" data={graph} />
+
   <div class="home">
-    <p class="eyebrow">{business.serviceArea}</p>
-    <h1>Renovăm scări de bloc, profesional și fără bătăi de cap</h1>
-    <p class="lead">
-      {business.name} renovează scările blocurilor din Cluj-Napoca pentru
-      asociații de proprietari și administratori de bloc — lucrări curate,
-      la termen și cu rezultate care se văd.
-    </p>
-    <p class="contact">
-      Sunați-ne la
-      <a href={business.telHref}>{business.phoneDisplay}</a>
-      sau scrieți-ne pe
-      <a href={business.whatsappHref}>WhatsApp</a>.
-    </p>
+    <!-- 1. Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">{business.serviceArea}</p>
+      <h1 id="hero-title">Renovăm scări de bloc, profesional și fără bătăi de cap</h1>
+      <p class="lead">
+        {business.name} renovează scările blocurilor din Cluj-Napoca pentru
+        asociații de proprietari și administratori de bloc — lucrări curate,
+        la termen și cu rezultate care se văd.
+      </p>
+
+      <div class="cta-cluster">
+        <a
+          class="apply-btn apply-btn--call"
+          href={business.telHref}
+          aria-label={`Sună la ${business.phoneDisplay}`}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M6.6 10.8a15.9 15.9 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.3 11.3 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.3 11.3 0 00.58 3.6 1 1 0 01-.24 1L6.6 10.8z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>Sună</span>
+        </a>
+
+        <a
+          class="apply-btn apply-btn--wa"
+          href={business.whatsappHref}
+          aria-label="Scrie-ne pe WhatsApp despre renovarea scării de bloc"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M12 2a10 10 0 00-8.6 15l-1.4 5 5.1-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.4.5c-.2.2-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- 2. Services summary -->
+    <section class="block" aria-labelledby="servicii-title">
+      <h2 id="servicii-title">Ce facem</h2>
+      <p>Ne ocupăm de tot ce ține de renovarea casei scării:</p>
+      <ul class="list list--services">
+        {services.map((s) => <li>{s.title}</li>)}
+      </ul>
+      <p class="block__link">
+        <a href="/servicii">Vezi toate serviciile</a>
+      </p>
+    </section>
+
+    <!-- 3. Trust-stats band -->
+    <section class="block block--surface" aria-labelledby="incredere-title">
+      <h2 id="incredere-title">De ce ne aleg administratorii</h2>
+      <dl class="stats">
+        <div class="stat">
+          <dt class="stat__label">Ani de experiență</dt>
+          <dd class="stat__value">{trust.yearsExperience}</dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">Lucrări finalizate</dt>
+          <dd class="stat__value">{trust.worksCompleted}</dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">Zonă deservită</dt>
+          <dd class="stat__value">{trust.serviceAreaLabel}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- 4. Featured projects -->
+    {
+      featured.length > 0 && (
+        <section class="block" aria-labelledby="lucrari-recente">
+          <h2 id="lucrari-recente">Lucrări recente</h2>
+          <ul class="grid" role="list">
+            {featured.map((entry) => (
+              <li>
+                <ProjectCard entry={entry} />
+              </li>
+            ))}
+          </ul>
+          <p class="block__link">
+            <a href="/lucrari">Vezi toate lucrările</a>
+          </p>
+        </section>
+      )
+    }
+
+    <!-- 5. "Cum lucrăm" teaser -->
+    <section class="block" aria-labelledby="cum-lucram">
+      <h2 id="cum-lucram">Cum lucrăm</h2>
+      <ol class="steps">
+        {
+          steps.map((step) => (
+            <li class="step">
+              <h3 class="step__name">{step.name}</h3>
+              <p class="step__text">{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="block__link">
+        <a href="/despre">Află mai multe despre cum lucrăm</a>
+      </p>
+    </section>
+
+    <!-- 6. FAQ (renders its own h2 + Q&A) -->
+    <Faq />
+
+    <!-- 7. Closing CTA -->
+    <section class="block" aria-labelledby="contact-title">
+      <h2 id="contact-title">Aveți o scară de bloc de renovat?</h2>
+      <p>Sunați-ne sau scrieți-ne pe WhatsApp — vă răspundem rapid și venim pentru un deviz gratuit.</p>
+      <div class="cta-cluster">
+        <a
+          class="apply-btn apply-btn--call"
+          href={business.telHref}
+          aria-label={`Sună la ${business.phoneDisplay}`}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M6.6 10.8a15.9 15.9 0 006.6 6.6l2.2-2.2a1 1 0 011-.24 11.3 11.3 0 003.6.58 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.3 11.3 0 00.58 3.6 1 1 0 01-.24 1L6.6 10.8z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>Sună</span>
+        </a>
+
+        <a
+          class="apply-btn apply-btn--wa"
+          href={business.whatsappHref}
+          aria-label="Scrie-ne pe WhatsApp despre renovarea scării de bloc"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M12 2a10 10 0 00-8.6 15l-1.4 5 5.1-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.4.5c-.2.2-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+      </div>
+    </section>
   </div>
 </BaseLayout>
 
 <style>
   .home {
-    max-width: 48rem;
+    max-width: 75rem;
     margin: 0 auto;
     padding: var(--space-2xl) var(--space-md);
   }
 
+  /* Hero */
   .eyebrow {
     font-family: var(--font-body);
     font-weight: 600;
@@ -41,25 +215,211 @@ const title = `${business.name} — Renovarea scărilor de bloc în Cluj-Napoca`
   }
 
   h1 {
+    font-family: var(--font-display);
     font-size: 1.75rem;
     font-weight: 700;
     letter-spacing: -0.01em;
+    line-height: 1.2;
     color: var(--color-slate-900);
+    margin: 0 0 var(--space-md);
+    max-width: 20ch;
   }
 
   .lead {
     color: var(--color-slate-700);
     font-size: 1.125rem;
+    margin: 0 0 var(--space-lg);
+    max-width: 60ch;
   }
 
-  .contact a {
+  /* Section blocks */
+  .block {
+    margin-top: var(--space-2xl);
+  }
+
+  .block--surface {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-slate-900);
+    margin: 0 0 var(--space-md);
+  }
+
+  .block > p {
+    color: var(--color-slate-700);
+    margin: 0 0 var(--space-md);
+    max-width: 60ch;
+  }
+
+  .block__link {
+    margin: var(--space-md) 0 0;
+  }
+
+  .block__link a {
     color: var(--color-accent);
     font-weight: 600;
   }
 
+  /* Lists */
+  .list {
+    margin: 0;
+    padding-left: var(--space-lg);
+    color: var(--color-slate-700);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Trust stats */
+  .stats {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .stat__value {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-slate-900);
+  }
+
+  .stat__label {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-slate-700);
+  }
+
+  /* Featured grid (verbatim tokens from /lucrari) */
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .grid > li {
+    display: flex;
+  }
+
+  .grid > li > :global(.card) {
+    width: 100%;
+  }
+
+  /* "Cum lucrăm" steps */
+  .steps {
+    margin: 0;
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    color: var(--color-slate-700);
+  }
+
+  .step__name {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-slate-900);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .step__text {
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  /* CTA cluster (markup + tokens from cariere.astro) */
+  .cta-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+
+  .apply-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-height: 56px;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+  }
+
+  .apply-btn--call {
+    background: var(--color-accent);
+    color: var(--color-on-dark);
+  }
+  .apply-btn--call:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .apply-btn--wa {
+    background: var(--color-whatsapp);
+    color: var(--color-on-dark);
+  }
+  .apply-btn--wa:hover {
+    background: var(--color-whatsapp-hover);
+  }
+
+  /* Inherited global :focus-visible ring applies; never removed. */
+
   @media (min-width: 768px) {
+    .home {
+      padding: var(--space-3xl) var(--space-lg);
+    }
     h1 {
       font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.75rem;
+    }
+    .block {
+      margin-top: var(--space-3xl);
+    }
+    .stats {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .stat__value {
+      font-size: 1.75rem;
+    }
+    .grid {
+      gap: var(--space-lg);
+    }
+    .cta-cluster {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    .apply-btn {
+      flex: 0 1 auto;
+      min-width: 12rem;
     }
   }
 </style>
