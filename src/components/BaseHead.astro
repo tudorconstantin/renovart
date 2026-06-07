@@ -1,19 +1,25 @@
 ---
-// SEO / meta helper. Renders charset, viewport, title, description, and a
-// minimal Open Graph stub. Per-page meta is extended via BaseLayout's
-// <slot name="head" /> (Phase 3 enriches OG/Twitter cards).
+// SEO / meta helper. Renders charset, viewport, title, description, Open Graph,
+// and Twitter card tags. Per-page meta + JSON-LD are extended via BaseLayout's
+// <slot name="head" />.
 import { business } from '../data/business';
 
 interface Props {
   title: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description = business.defaultDescription } = Astro.props;
+const {
+  title,
+  description = business.defaultDescription,
+  image = business.ogImage,
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? business.domain);
-// Absolute OG image URL so social unfurls (WhatsApp/Facebook/LinkedIn) resolve
-// the preview image (WR-02). business.ogImage is the canonical default.
-const ogImage = new URL(business.ogImage, Astro.site ?? business.domain).href;
+// Absolute OG/Twitter image URL so social unfurls (WhatsApp/Facebook/LinkedIn/X)
+// resolve the preview image (WR-02). `image` defaults to business.ogImage but a
+// page may override it.
+const ogImage = new URL(image, Astro.site ?? business.domain).href;
 ---
 
 <meta charset="utf-8" />
@@ -26,7 +32,7 @@ const ogImage = new URL(business.ogImage, Astro.site ?? business.domain).href;
 <title>{title}</title>
 <meta name="description" content={description} />
 
-<!-- Open Graph stub (Phase 3 enriches this) -->
+<!-- Open Graph -->
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="ro_RO" />
 <meta property="og:site_name" content={business.name} />
@@ -35,3 +41,9 @@ const ogImage = new URL(business.ogImage, Astro.site ?? business.domain).href;
 <meta property="og:url" content={canonical.href} />
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:alt" content={`${business.name} — renovarea scărilor de bloc`} />
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
