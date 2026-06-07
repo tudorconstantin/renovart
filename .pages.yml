@@ -1,0 +1,81 @@
+# Pages CMS config (CMS-01 / CMS-02) — renovart Astro project.
+# Lives at the GIT REPO ROOT (this Astro project dir = the dir Pages CMS is pointed at).
+# All paths below are relative to THIS repo root (the actual code repo is the inner
+# `renovart/` dir of the working tree; `.planning/` lives in the unversioned parent and
+# is NOT part of this repo). RESEARCH Pattern 1/2; CLAUDE.md "Pages CMS — .pages.yml".
+
+media:
+  # Single global media browser (D-01): ONE shared, src/-rooted folder for all lucrari
+  # imagery so astro:assets optimizes uploads (D-02), not the verbatim-copied public/.
+  - name: lucrari
+    label: Imagini lucrări
+    input: src/assets/lucrari # where the CMS commits uploaded binaries in the repo
+    # CRITICAL (Pitfall 1): `output` is the prefix written INTO frontmatter strings; it
+    # MUST equal the import.meta.glob key in resolveLucrareImage.ts, i.e. /src/assets/lucrari.
+    # This deliberately differs from CLAUDE.md's literal public-style `/media` example —
+    # a public path would never match the glob key and the build would fail closed.
+    output: /src/assets/lucrari
+    extensions: [jpg, jpeg, png, webp]
+    categories: [image]
+
+content:
+  - name: lucrari
+    label: Lucrări (proiecte)
+    type: collection
+    path: src/content/lucrari
+    format: yaml-frontmatter # frontmatter + markdown body round-trip
+    view:
+      fields: [title, location, date, featured]
+    fields:
+      - name: title
+        label: Titlu
+        type: string
+      - name: location
+        label: Locație
+        type: string
+      - name: date
+        label: Dată
+        type: date
+        options:
+          format: yyyy-MM-dd # matches z.coerce.date()
+      - name: featured
+        label: Afișează pe pagina principală
+        type: boolean
+        description: Bifați pentru a evidenția acest proiect pe prima pagină.
+      - name: coverImage
+        label: Imagine principală (copertă)
+        type: image
+        options:
+          media: lucrari
+      # Before/after comparisons → slider. The object+list shape makes before↔după
+      # misalignment structurally impossible in the form (D-04).
+      - name: pairs
+        label: Perechi Înainte / După
+        type: object
+        list: true
+        description: Adăugați câte o pereche pentru fiecare comparație înainte/după.
+        fields:
+          - name: before
+            label: Înainte
+            type: image
+            options:
+              media: lucrari
+          - name: after
+            label: După
+            type: image
+            options:
+              media: lucrari
+      # After-only photos → gallery (D-05). type: image + list: true yields a flat
+      # string[] matching gallery: z.array(z.string()) (RESEARCH Open Q2).
+      - name: gallery
+        label: Galerie (doar „După”)
+        type: image
+        list: true
+        options:
+          media: lucrari
+        description: Fotografii ale lucrării finalizate (când nu există imagini „înainte”).
+      - name: body
+        label: Descriere
+        type: rich-text
+      # NOTE: `category` is intentionally NOT exposed (D-08) — no filtering UI consumes
+      # it; it stays an optional schema field in src/content.config.ts, hidden from the form.

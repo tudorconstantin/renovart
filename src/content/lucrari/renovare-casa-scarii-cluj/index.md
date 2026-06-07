@@ -4,13 +4,14 @@ location: "Cluj-Napoca"
 date: 2026-05-15
 category: scara-bloc
 featured: true
-coverImage: ./palier-vopsit.jpg
-afterImages:
-  - ./trepte-bordo.jpg
-  - ./palier-vopsit.jpg
-  - ./lambriu-vertical.jpg
-  - ./usi-acces.jpg
-  - ./corp-iluminat.jpg
+coverImage: /src/assets/lucrari/cluj-palier-vopsit.jpg
+pairs: []
+gallery:
+  - /src/assets/lucrari/cluj-trepte-bordo.jpg
+  - /src/assets/lucrari/cluj-palier-vopsit.jpg
+  - /src/assets/lucrari/cluj-lambriu-vertical.jpg
+  - /src/assets/lucrari/cluj-usi-acces.jpg
+  - /src/assets/lucrari/cluj-corp-iluminat.jpg
 ---
 
 Lucrare de finisaje completă pentru casa scării a unui bloc din Cluj-Napoca.
