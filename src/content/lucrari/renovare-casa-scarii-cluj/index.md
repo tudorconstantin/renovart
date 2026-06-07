@@ -4,7 +4,7 @@ location: "Cluj-Napoca"
 date: 2026-05-15
 category: scara-bloc
 featured: true
-coverImage: ./trepte-bordo.jpg
+coverImage: ./palier-vopsit.jpg
 afterImages:
   - ./trepte-bordo.jpg
   - ./palier-vopsit.jpg
