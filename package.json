@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "verify": "astro build && node scripts/validate-jsonld.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.2",

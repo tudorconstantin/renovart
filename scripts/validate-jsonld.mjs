@@ -78,4 +78,50 @@ if (detailPages.length === 0) fail('no dist/lucrari/*/index.html detail pages');
 const anyBreadcrumb = detailPages.some((f) => readFileSync(f, 'utf8').includes('BreadcrumbList'));
 if (!anyBreadcrumb) fail('no BreadcrumbList JSON-LD on any dist/lucrari/*/index.html');
 
-console.log(`ALL_PASS: ${files.length} html files, ${ldCount} JSON-LD blocks valid; no <form> on Contact; no placeholders; expected node types present`);
+// 5. (D-03 / CMS-02) lucrari images survived the CMS->astro:assets round-trip as
+//    optimized AVIF/WebP with srcset — not shipped verbatim. <Picture> emits a
+//    <source type="image/avif"> + <source type="image/webp"> pair carrying srcset.
+//    Astro may order attributes either way (srcset before or after type), so the
+//    regex tolerates both orderings on the same <source> tag.
+const lucrariPages = globSync('dist/lucrari/*/index.html');
+if (lucrariPages.length === 0) fail('no dist/lucrari/*/index.html pages to check images');
+
+const sourceHas = (html, fmt) => {
+  const tagRe = /<source\b[^>]*>/gi;
+  let m;
+  while ((m = tagRe.exec(html)) !== null) {
+    const tag = m[0];
+    if (new RegExp(`type=["']image\\/${fmt}["']`, 'i').test(tag) && /srcset=/i.test(tag)) return true;
+  }
+  return false;
+};
+
+let sawOptimizedPicture = false;
+for (const f of lucrariPages) {
+  const html = readFileSync(f, 'utf8');
+  if (sourceHas(html, 'avif') && sourceHas(html, 'webp')) sawOptimizedPicture = true;
+}
+if (!sawOptimizedPicture)
+  fail('no optimized <Picture> (avif+webp+srcset) found on any dist/lucrari/* page — CMS image round-trip may have dropped astro:assets');
+
+// 6. Next-gen optimized assets actually emitted into _astro/.
+const optimizedAssets = globSync('dist/_astro/*.{avif,webp}');
+if (optimizedAssets.length === 0)
+  fail('no dist/_astro/*.{avif,webp} emitted — astro:assets did not optimize any image');
+
+// 7. (SEO-06 / D-13) Sitemap emitted from the custom domain (never github.io).
+const sitemapIdx = 'dist/sitemap-index.xml';
+const sitemapSet0 = 'dist/sitemap-0.xml';
+if (!existsSync(sitemapIdx)) fail(`${sitemapIdx} missing — @astrojs/sitemap did not emit the index`);
+if (!existsSync(sitemapSet0)) fail(`${sitemapSet0} missing — @astrojs/sitemap did not emit the url set`);
+const sitemapIdxXml = readFileSync(sitemapIdx, 'utf8');
+if (!sitemapIdxXml.includes('https://nume-firma.ro/'))
+  fail('sitemap-index.xml does not reference the custom domain (https://nume-firma.ro/)');
+if (sitemapIdxXml.includes('github.io'))
+  fail('sitemap references github.io — site/base misconfigured');
+
+console.log(
+  `ALL_PASS: ${files.length} html files, ${ldCount} JSON-LD blocks valid; no <form> on Contact; ` +
+    `no placeholders; expected node types present; ${lucrariPages.length} lucrari page(s) ship optimized ` +
+    `AVIF/WebP+srcset (${optimizedAssets.length} next-gen assets); sitemap emits from nume-firma.ro (no github.io)`,
+);
