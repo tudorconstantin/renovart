@@ -10,6 +10,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { business } from '../data/business';
 import { homeAndConstructionBusiness } from '../data/schema';
 import JsonLd from '../components/JsonLd.astro';
+import { getEntry } from 'astro:content';
+
+// Phase 5: editable chrome (h1, lead, CTA labels) from the JSON-backed
+// collection. The NAP <dl> + JSON-LD below stay business.ts-derived (LAY-05).
+const contact = (await getEntry('contactCopy', 'main'))!.data;
 
 const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness() };
 ---
@@ -22,11 +27,8 @@ const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness(
 
   <div class="page">
     <div class="intro">
-      <h1>Contact</h1>
-      <p class="lead">
-        Sunați, scrieți-ne pe WhatsApp sau trimiteți un email — vă răspundem
-        rapid cu un deviz clar pentru renovarea scării dumneavoastră de bloc.
-      </p>
+      <h1>{contact.headline}</h1>
+      <p class="lead">{contact.lead}</p>
     </div>
 
     <div class="cta-cluster">
@@ -41,7 +43,7 @@ const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness(
             fill="currentColor"
           />
         </svg>
-        <span>Sună</span>
+        <span>{contact.ctaCallLabel}</span>
       </a>
 
       <a
@@ -55,7 +57,7 @@ const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness(
             fill="currentColor"
           />
         </svg>
-        <span>WhatsApp</span>
+        <span>{contact.ctaWaLabel}</span>
       </a>
 
       <a
@@ -69,7 +71,7 @@ const node = { '@context': 'https://schema.org', ...homeAndConstructionBusiness(
             fill="currentColor"
           />
         </svg>
-        <span>Email</span>
+        <span>{contact.ctaEmailLabel}</span>
       </a>
     </div>
 

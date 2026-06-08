@@ -7,6 +7,11 @@
 // (CONTEXT). All contact actions come from the single-source NAP module.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { business } from '../data/business';
+import { getEntry } from 'astro:content';
+
+// Phase 5: editable copy from the JSON-backed collection (DOM-only — Despre
+// emits no JSON-LD). Read ONCE into a const. NAP/CTA hrefs stay business.ts.
+const despre = (await getEntry('despreCopy', 'main'))!.data;
 
 const title = `Despre — ${business.name}`;
 const description =
@@ -16,72 +21,36 @@ const description =
 <BaseLayout title={title} description={description}>
   <div class="page">
     <div class="intro">
-      <h1>Despre {business.name}</h1>
-      <p class="lead">
-        Suntem o echipă din Cluj-Napoca specializată în renovarea scărilor de
-        bloc — zugrăveli, reparații și finisaje pentru casa scării. Lucrăm
-        direct cu administratorii și asociațiile de proprietari, cu lucruri
-        spuse pe șleau de la început: ce se face, în cât timp și cu ce buget.
-        Fără promisiuni umflate — preferăm să fim corecți acum și recomandați
-        mai departe.
-      </p>
+      <h1>{despre.headline}</h1>
+      <p class="lead">{despre.storyLead}</p>
     </div>
 
     <section class="block" aria-labelledby="cum-lucram">
-      <h2 id="cum-lucram">Cum lucrăm</h2>
-      <p>
-        Lucrarea trece prin patru pași clari, ca să știți tot timpul la ce etapă
-        suntem:
-      </p>
+      <h2 id="cum-lucram">{despre.cumLucramHeading}</h2>
+      <p>{despre.cumLucramIntro}</p>
       <ol class="steps">
-        <li class="steps__item">
-          <h3 class="steps__title">1. Evaluare și deviz</h3>
-          <p>
-            Venim la fața locului, măsurăm și vă dăm un deviz clar, în scris, cu
-            ce se face și cât costă. Fără costuri ascunse.
-          </p>
-        </li>
-        <li class="steps__item">
-          <h3 class="steps__title">2. Planificare</h3>
-          <p>
-            Stabilim împreună perioada și ordinea lucrărilor, astfel încât
-            accesul în scară să fie afectat cât mai puțin pentru locatari.
-          </p>
-        </li>
-        <li class="steps__item">
-          <h3 class="steps__title">3. Execuție</h3>
-          <p>
-            Echipa execută lucrarea curat și ordonat, cu protejarea suprafețelor
-            și curățenie la final de zi. Vă ținem la curent cu progresul.
-          </p>
-        </li>
-        <li class="steps__item">
-          <h3 class="steps__title">4. Predare și garanție</h3>
-          <p>
-            Predăm lucrarea finalizată, primiți factură, iar pentru lucrările
-            executate oferim garanție. Rămânem disponibili dacă apare ceva.
-          </p>
-        </li>
+        {
+          despre.steps.map((step, i) => (
+            <li class="steps__item">
+              <h3 class="steps__title">{i + 1}. {step.name}</h3>
+              <p>{step.text}</p>
+            </li>
+          ))
+        }
       </ol>
     </section>
 
     <section class="block block--surface" aria-labelledby="de-ce-noi">
-      <h2 id="de-ce-noi">De ce noi</h2>
-      <p>Lucrăm transparent și pe înțelesul unei asociații de proprietari:</p>
+      <h2 id="de-ce-noi">{despre.deCeNoiHeading}</h2>
+      <p>{despre.deCeNoiIntro}</p>
       <ul class="list">
-        <li>Deviz clar, în scris, înainte de a începe</li>
-        <li>Factură pentru fiecare lucrare</li>
-        <li>Lucrăm cu asociații de proprietari și administratori de bloc</li>
-        <li>Plată pe etape, pe măsură ce avansează lucrarea</li>
+        {despre.deCeNoiBullets.map((bullet) => <li>{bullet}</li>)}
       </ul>
     </section>
 
     <section class="block" aria-labelledby="contact">
-      <h2 id="contact">Hai să vorbim despre scara dumneavoastră</h2>
-      <p class="cta-instruction">
-        Sunați sau scrieți-ne pe WhatsApp — vă răspundem rapid și venim pentru o
-        evaluare.
-      </p>
+      <h2 id="contact">{despre.closingHeading}</h2>
+      <p class="cta-instruction">{despre.closingLead}</p>
 
       <div class="cta-cluster">
         <a
@@ -95,7 +64,7 @@ const description =
               fill="currentColor"
             />
           </svg>
-          <span>Sună</span>
+          <span>{despre.ctaCallLabel}</span>
         </a>
 
         <a
@@ -109,7 +78,7 @@ const description =
               fill="currentColor"
             />
           </svg>
-          <span>WhatsApp</span>
+          <span>{despre.ctaWaLabel}</span>
         </a>
       </div>
     </section>
