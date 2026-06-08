@@ -30,13 +30,10 @@ export const business = {
   ogImage: '/og-default.png',
 } as const;
 
-// Trust-stats band values (PAG-01). Kept here so NAP stays single-sourced
-// (serviceAreaLabel reuses business.serviceArea — no duplication).
-// LAUNCH CHECKLIST: yearsExperience and worksCompleted are conservative
-// owner-supplied placeholders — confirm the real numbers with the client
-// before handoff. Do NOT inflate.
-export const trust = {
-  yearsExperience: 'peste 10',
-  worksCompleted: 'zeci de',
-  serviceAreaLabel: business.serviceArea,
-} as const;
+// NOTE (Phase 5, CMS-03): the former `trust` const moved to the CMS-editable
+// src/data/copy/trust.json (loaded via the `trustCopy` collection). The trust
+// band's serviceArea value stays derived from business.serviceArea here so the
+// NAP single-source (LAY-05) is not duplicated into the copy JSON.
+// LAUNCH CHECKLIST: yearsExperience and worksCompleted in trust.json are
+// conservative owner-supplied placeholders — confirm the real numbers with the
+// client before handoff. Do NOT inflate.

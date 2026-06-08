@@ -1,9 +1,11 @@
 ---
 // Visible, always-on FAQ (PAG-05) — zero JS, no accordion, no disclosure widget.
-// Renders the single-source faq.ts items as semantic <h3> question + <p>
-// answer pairs so the content is in the static DOM for AEO crawlers and
-// screen readers. The same faq array also feeds faqPageSchema() (no drift).
-import { faq } from '../data/faq';
+// Renders the single-source faqCopy collection items as semantic <h3> question
+// + <p> answer pairs so the content is in the static DOM for AEO crawlers and
+// screen readers. The same faqCopy array also feeds faqPageSchema() (no drift).
+// Copy is CMS-editable JSON (src/data/copy/faq.json); array order is preserved.
+import { getCollection } from 'astro:content';
+const faq = (await getCollection('faqCopy')).map((e) => e.data);
 ---
 
 <section class="faq" aria-labelledby="faq-title">

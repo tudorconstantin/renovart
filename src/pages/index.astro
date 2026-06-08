@@ -9,14 +9,19 @@
 // from business.ts (LAY-05); schema is derived from the same source (no drift).
 // Zero new client-side JS, no form element, tokens-only styles (no new CSS tokens).
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { business, trust } from '../data/business';
-import { getCollection } from 'astro:content';
+import { business } from '../data/business';
+import { getCollection, getEntry } from 'astro:content';
 import ProjectCard from '../components/ProjectCard.astro';
 import Faq from '../components/Faq.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { homeAndConstructionBusiness, faqPageSchema } from '../data/schema';
-import { faq } from '../data/faq';
-import { services } from '../data/services';
+
+// Phase 5: editable copy from the JSON-backed collections (single source for
+// DOM + JSON-LD, no drift — D-10). Read each ONCE into a const (Pitfall 3).
+// serviceAreaLabel stays derived from business.serviceArea (NAP single-source).
+const faq = (await getCollection('faqCopy')).map((e) => e.data);
+const services = (await getCollection('servicesCopy')).map((e) => e.data);
+const trust = (await getEntry('trustCopy', 'main'))!.data;
 
 const title = `${business.name} — Renovarea scărilor de bloc în Cluj-Napoca`;
 const description =
@@ -114,7 +119,7 @@ const steps = [
         </div>
         <div class="stat">
           <dt class="stat__label">Zonă deservită</dt>
-          <dd class="stat__value">{trust.serviceAreaLabel}</dd>
+          <dd class="stat__value">{business.serviceArea}</dd>
         </div>
       </dl>
     </section>

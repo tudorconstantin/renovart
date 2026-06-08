@@ -7,9 +7,15 @@
 // styles use inherited tokens only (no new custom properties). Zero new JS.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { business } from '../data/business';
-import { services } from '../data/services';
+import { getCollection } from 'astro:content';
 import { homeAndConstructionBusiness, serviceSchema } from '../data/schema';
 import JsonLd from '../components/JsonLd.astro';
+
+// Phase 5: services copy from the JSON-backed collection (CMS-editable). Read
+// ONCE into a const and feed the SAME array to both the DOM map below and
+// serviceSchema() so the visible blocks and the Service JSON-LD cannot drift
+// (D-10, Pitfall 3). icon stays a fixed enum constrained in content.config.ts.
+const services = (await getCollection('servicesCopy')).map((e) => e.data);
 
 // SEO-04: emit a @graph so the Service's provider @id resolves locally for
 // validators (RESEARCH Pitfall 5). Business node + Service node share one
