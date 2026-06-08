@@ -153,3 +153,120 @@ content:
         label: Termen execuție (opțional)
         type: string
         description: 'Opțional. Lăsați gol pentru «termene scurte».'
+  # homeCopy — Home page chrome. Object-format JSON singleton: the editable
+  # fields live under the single top-level `main` key, mirrored by the `main`
+  # object field below (same convention as the object-format files). Structured
+  # plain-text fields only; heading levels, classes and CTA links stay fixed in
+  # code (D-08). Help text states the UI-SPEC char caps.
+  - name: homeCopy
+    label: Pagina principală (texte)
+    type: file
+    path: src/data/copy/home.json
+    format: json
+    fields:
+      - name: main
+        label: Conținut pagină principală
+        type: object
+        fields:
+          - name: eyebrow
+            label: Supratitlu (deasupra titlului)
+            type: string
+            description: 'Frază scurtă, fără punct. Maxim ~40 de caractere.'
+          - name: headline
+            label: Titlu principal
+            type: string
+            description: 'O singură idee, beneficiu clar. Maxim ~60 de caractere.'
+          - name: lead
+            label: Subtitlu (intro)
+            type: text
+            description: '1–2 propoziții. Maxim ~220 de caractere.'
+          - name: servicesHeading
+            label: Titlu secțiune „Ce facem”
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: servicesIntro
+            label: Text secțiune „Ce facem”
+            type: text
+            description: 'Maxim ~300 de caractere.'
+          - name: trustHeading
+            label: Titlu secțiune „De ce ne aleg”
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: trustIntro
+            label: Text secțiune „De ce ne aleg”
+            type: text
+            description: 'Maxim ~300 de caractere.'
+          - name: featuredHeading
+            label: Titlu secțiune „Lucrări recente”
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: stepsHeading
+            label: Titlu secțiune „Cum lucrăm”
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: steps
+            label: Pași „Cum lucrăm”
+            type: object
+            list: true
+            description: 'Între 3 și 4 pași. Fiecare cu un nume scurt și o frază.'
+            fields:
+              - name: name
+                label: Nume pas
+                type: string
+                description: 'Maxim ~30 de caractere.'
+              - name: text
+                label: Descriere pas
+                type: text
+                description: 'Maxim ~160 de caractere.'
+          - name: closingHeading
+            label: Titlu secțiune finală (CTA)
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: closingLead
+            label: Text secțiune finală (CTA)
+            type: text
+            description: 'Maxim ~300 de caractere.'
+          - name: ctaCallLabel
+            label: Etichetă buton «Sună»
+            type: string
+            description: 'Maxim 12 caractere.'
+          - name: ctaWaLabel
+            label: Etichetă buton «WhatsApp»
+            type: string
+            description: 'Maxim 12 caractere.'
+  # serviciiCopy — Servicii page chrome (object-format singleton, `main` key).
+  # The six service blocks themselves are edited under „Servicii (texte)” above.
+  - name: serviciiCopy
+    label: Pagina Servicii (texte)
+    type: file
+    path: src/data/copy/servicii.json
+    format: json
+    fields:
+      - name: main
+        label: Conținut pagină Servicii
+        type: object
+        fields:
+          - name: headline
+            label: Titlu principal
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: lead
+            label: Subtitlu (intro)
+            type: text
+            description: '1–2 propoziții. Maxim ~300 de caractere.'
+          - name: closingHeading
+            label: Titlu secțiune finală (CTA)
+            type: string
+            description: 'Maxim ~60 de caractere.'
+          - name: closingLead
+            label: Text secțiune finală (CTA)
+            type: text
+            description: 'Maxim ~300 de caractere.'
+          - name: ctaCallLabel
+            label: Etichetă buton «Sună»
+            type: string
+            description: 'Maxim 12 caractere.'
+          - name: ctaWaLabel
+            label: Etichetă buton «WhatsApp»
+            type: string
+            description: 'Maxim 12 caractere.'
