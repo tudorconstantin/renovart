@@ -130,29 +130,38 @@ content:
         description: Alegeți din lista fixă.
         options:
           values: [paint, stairs, rail, door, bulb, shield]
+  # trustCopy — object-format JSON singleton (mirrors trust.json's `{ "main": {...} }`).
+  # The editable fields live under the single top-level `main` key, exactly like
+  # home/servicii/despre/contact. A FLAT shape here would make Pages CMS write
+  # `{ yearsExperience: ... }` (no `main` wrapper) on save, corrupting the file so
+  # the next `astro build` fails closed (CR-01).
   - name: trustCopy
     label: Statistici de încredere
     type: file
     path: src/data/copy/trust.json
     format: json
     fields:
-      - name: yearsExperience
-        label: Ani de experiență
-        type: string
-      - name: worksCompleted
-        label: Lucrări finalizate
-        type: string
-      - name: warrantyText
-        label: Garanție (text)
-        type: text
-      - name: warrantyMonths
-        label: Garanție (durată — opțional)
-        type: string
-        description: 'Opțional. Lăsați gol pentru formularea calitativă (D-05).'
-      - name: turnaroundDays
-        label: Termen execuție (opțional)
-        type: string
-        description: 'Opțional. Lăsați gol pentru «termene scurte».'
+      - name: main
+        label: Statistici de încredere
+        type: object
+        fields:
+          - name: yearsExperience
+            label: Ani de experiență
+            type: string
+          - name: worksCompleted
+            label: Lucrări finalizate
+            type: string
+          - name: warrantyText
+            label: Garanție (text)
+            type: text
+          - name: warrantyMonths
+            label: Garanție (durată — opțional)
+            type: string
+            description: 'Opțional. Lăsați gol pentru formularea calitativă (D-05).'
+          - name: turnaroundDays
+            label: Termen execuție (opțional)
+            type: string
+            description: 'Opțional. Lăsați gol pentru «termene scurte».'
   # homeCopy — Home page chrome. Object-format JSON singleton: the editable
   # fields live under the single top-level `main` key, mirrored by the `main`
   # object field below (same convention as the object-format files). Structured
