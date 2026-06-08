@@ -79,3 +79,77 @@ content:
         type: rich-text
       # NOTE: `category` is intentionally NOT exposed (D-08) — no filtering UI consumes
       # it; it stays an optional schema field in src/content.config.ts, hidden from the form.
+
+  # ── Phase 5 editable marketing copy (CMS-03, D-08/D-09/D-11) ────────────────
+  # Three `type: file` singletons over the src/data/copy/*.json files loaded by
+  # the faqCopy/servicesCopy/trustCopy collections. STRUCTURED plain-text fields
+  # only (type string/text/select) — the rich body editor stays reserved for the
+  # lucrari project body above (D-08). Romanian labels + `description` help text
+  # stating the UI-SPEC char caps.
+  - name: faqCopy
+    label: Întrebări frecvente
+    type: file
+    path: src/data/copy/faq.json
+    format: json
+    list: true # whole file is a top-level array of Q&A items
+    fields:
+      - name: id
+        label: Identificator (nu modificați)
+        type: string
+        description: Cod intern al întrebării. Lăsați neschimbat.
+      - name: question
+        label: Întrebare
+        type: string
+        description: 'Trebuie să se termine cu „?". Maxim ~80 de caractere.'
+      - name: answer
+        label: Răspuns
+        type: text
+        description: 'Începeți cu răspunsul direct. Maxim ~600 de caractere.'
+  - name: servicesCopy
+    label: Servicii (texte)
+    type: file
+    path: src/data/copy/services.json
+    format: json
+    list: true # whole file is a top-level array of 6 services
+    fields:
+      - name: slug
+        label: Identificator (nu modificați)
+        type: string
+        description: Cod intern al serviciului. Lăsați neschimbat.
+      - name: title
+        label: Titlu serviciu
+        type: string
+        description: 'Maxim ~60 de caractere.'
+      - name: description
+        label: Descriere serviciu
+        type: text
+        description: 'Maxim ~400 de caractere.'
+      - name: icon
+        label: Pictogramă
+        type: select
+        description: Alegeți din lista fixă.
+        options:
+          values: [paint, stairs, rail, door, bulb, shield]
+  - name: trustCopy
+    label: Statistici de încredere
+    type: file
+    path: src/data/copy/trust.json
+    format: json
+    fields:
+      - name: yearsExperience
+        label: Ani de experiență
+        type: string
+      - name: worksCompleted
+        label: Lucrări finalizate
+        type: string
+      - name: warrantyText
+        label: Garanție (text)
+        type: text
+      - name: warrantyMonths
+        label: Garanție (durată — opțional)
+        type: string
+        description: 'Opțional. Lăsați gol pentru formularea calitativă (D-05).'
+      - name: turnaroundDays
+        label: Termen execuție (opțional)
+        type: string
+        description: 'Opțional. Lăsați gol pentru «termene scurte».'
