@@ -38,7 +38,12 @@ if (!existsSync(contact)) fail(`${contact} missing`);
 if (/<form/i.test(readFileSync(contact, 'utf8'))) fail(`<form> present in ${contact}`);
 
 // 3. No leftover placeholders anywhere in rendered HTML.
-const placeholderRe = /\bTODO\b|lorem ipsum|\[TOKEN\]/i;
+// WR-06: use SPECIFIC, prose-proof token markers that cannot legitimately appear in
+// Romanian copy. The old `\bTODO\b` / `[TOKEN]` would false-FAIL on genuine prose that
+// merely contains the English word "TODO" or any bracketed token. Authors should mark
+// real placeholders with one of these explicit sentinels (e.g. `{{TODO}}`); `lorem ipsum`
+// stays because it is itself unambiguous filler text that must never ship.
+const placeholderRe = /\{\{\s*TODO\s*\}\}|@@PLACEHOLDER@@|lorem ipsum/i;
 for (const f of files) {
   if (placeholderRe.test(readFileSync(f, 'utf8'))) fail(`leftover placeholder in ${f}`);
 }
@@ -66,7 +71,15 @@ let serviceNodeFound = false;
   let m;
   const sre = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g;
   while ((m = sre.exec(html)) !== null) {
-    for (const node of flatten(JSON.parse(m[1]))) {
+    // WR-04: guard the parse and route through fail() rather than relying on the implicit
+    // (undocumented) assumption that section 1 already validated every block in this file.
+    let parsed;
+    try {
+      parsed = JSON.parse(m[1]);
+    } catch (e) {
+      fail(`invalid JSON-LD in ${serviciiFile}: ${e.message}`);
+    }
+    for (const node of flatten(parsed)) {
       if (node && node['@type'] === 'Service' && node.provider) serviceNodeFound = true;
     }
   }
@@ -96,13 +109,17 @@ const sourceHas = (html, fmt) => {
   return false;
 };
 
-let sawOptimizedPicture = false;
+// WR-05: assert the round-trip PER-PAGE, not "any page". A single slider page passing
+// used to make the whole gate green even if an after-only gallery page shipped zero
+// optimized images (this also closes CR-01's false-pass). Every lucrari surface must
+// ship an avif+webp+srcset <source> pair.
 for (const f of lucrariPages) {
   const html = readFileSync(f, 'utf8');
-  if (sourceHas(html, 'avif') && sourceHas(html, 'webp')) sawOptimizedPicture = true;
+  if (!(sourceHas(html, 'avif') && sourceHas(html, 'webp')))
+    fail(
+      `no optimized <Picture> (avif+webp+srcset) on ${f} — CMS image round-trip dropped astro:assets on this page`,
+    );
 }
-if (!sawOptimizedPicture)
-  fail('no optimized <Picture> (avif+webp+srcset) found on any dist/lucrari/* page — CMS image round-trip may have dropped astro:assets');
 
 // 6. Next-gen optimized assets actually emitted into _astro/.
 const optimizedAssets = globSync('dist/_astro/*.{avif,webp}');
