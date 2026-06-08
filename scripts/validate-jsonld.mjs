@@ -155,6 +155,17 @@ const joinedLd = (html) =>
 // First entry of an array-format OR object-format file() copy file.
 const firstEntry = (json) => (Array.isArray(json) ? json[0] : Object.values(json)[0]);
 
+// WR-02: a raw substring probe false-FAILs the moment an editable string contains
+// a character that one side escapes. Apply each side's exact escaping transform to
+// the probe before comparison so a future legitimate CMS edit (e.g. an answer
+// starting `"Da, ...` or `<2 săptămâni`) cannot masquerade as a drift regression.
+//   - DOM side: Astro HTML-escapes & < > (and " in attributes, but these probes hit
+//     element text) when rendering `{copy}` into the static HTML.
+//   - JSON-LD side: the value is JSON-encoded (a `"` becomes \", a `\` becomes \\)
+//     and Astro additionally rewrites `<` to the < escape inside ld+json.
+const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escapeLd = (s) => JSON.stringify(s).slice(1, -1).replace(/</g, '\\u003c');
+
 // 8. FAQ answer copy reaches the Home DOM AND the Home FAQPage JSON-LD from one source.
 const faqJsonPath = 'src/data/copy/faq.json';
 if (!existsSync(faqJsonPath)) fail(`${faqJsonPath} missing — copy source for the sync probe is gone`);
@@ -163,9 +174,9 @@ if (!faqFirst || typeof faqFirst.answer !== 'string')
   fail(`${faqJsonPath} first entry has no string "answer" — cannot run the FAQ sync probe`);
 const faqProbe = faqFirst.answer.slice(0, 24); // stable prefix
 const homeHtml = readFileSync('dist/index.html', 'utf8');
-if (!homeHtml.includes(faqProbe))
+if (!homeHtml.includes(escapeHtml(faqProbe)))
   fail(`FAQ answer copy not in Home DOM — copy extraction/render broken (probe: "${faqProbe}")`);
-if (!joinedLd(homeHtml).includes(faqProbe.replace(/"/g, '\\"')))
+if (!joinedLd(homeHtml).includes(escapeLd(faqProbe)))
   fail(`FAQ answer not in Home FAQPage JSON-LD — DOM/JSON-LD drift (D-10) (probe: "${faqProbe}")`);
 
 // 9. Service description copy reaches the Servicii DOM AND the Servicii Service JSON-LD.
@@ -177,9 +188,9 @@ if (!serviceFirst || typeof serviceFirst.description !== 'string')
   fail(`${servicesJsonPath} first entry has no string "description" — cannot run the Service sync probe`);
 const serviceProbe = serviceFirst.description.slice(0, 24);
 const serviciiHtml = readFileSync(serviciiFile, 'utf8');
-if (!serviciiHtml.includes(serviceProbe))
+if (!serviciiHtml.includes(escapeHtml(serviceProbe)))
   fail(`Service description copy not in Servicii DOM — copy extraction/render broken (probe: "${serviceProbe}")`);
-if (!joinedLd(serviciiHtml).includes(serviceProbe.replace(/"/g, '\\"')))
+if (!joinedLd(serviciiHtml).includes(escapeLd(serviceProbe)))
   fail(`Service description not in Servicii Service JSON-LD — DOM/JSON-LD drift (D-10) (probe: "${serviceProbe}")`);
 
 console.log(
