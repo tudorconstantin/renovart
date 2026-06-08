@@ -47,7 +47,19 @@ const lucrari = defineCollection({
       // broken/empty slider.
       gallery: z.array(z.string()).default([]),
       featured: z.boolean().default(false), // owner-controlled homepage toggle (D-08)
-    }),
+    })
+      // CR-01 invariant: the detail page is binary on `pairs.length > 0` and falls into
+      // the gallery branch otherwise. An entry with BOTH `pairs` and `gallery` empty would
+      // render an empty, screen-reader-labelled <ul> (a broken page from a valid CMS edit).
+      // Enforce "at least one image surface" at content-load so the build fails closed with
+      // a clear message instead of shipping the empty gallery. Legitimate shapes still pass:
+      // pairs-only (slider), gallery-only (the real Cluj after-only project), or both.
+      .refine((d) => d.pairs.length > 0 || d.gallery.length > 0, {
+        message:
+          'Lucrarea nu are nici perechi înainte/după (pairs), nici galerie (gallery) — ' +
+          'adăugați cel puțin o imagine de comparație sau o fotografie în galerie.',
+        path: ['pairs'],
+      }),
 });
 
 export const collections = { lucrari };

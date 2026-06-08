@@ -40,13 +40,28 @@ const { title, location, date, pairs, gallery } = entry.data;
 // strings (D-02); resolve them through the import.meta.glob bridge into
 // ImageMetadata at build so <Picture>/<BeforeAfter> still emit AVIF/WebP + srcset.
 const hasPairs = pairs.length > 0;
+const hasGallery = gallery.length > 0;
+// CR-01: the schema `.refine()` already rejects the empty-both shape at content-load,
+// but guard here too (defense in depth, consistent with resolveLucrareImage's
+// fail-closed philosophy) so this page can NEVER emit an empty, labelled gallery <ul>.
+if (!hasPairs && !hasGallery) {
+  throw new Error(
+    `Lucrarea "${entry.id}" nu are nici perechi înainte/după, nici galerie — ` +
+      `adăugați cel puțin o imagine.`,
+  );
+}
 const resolvedPairs = await Promise.all(
   pairs.map(async (p) => ({
     before: await resolveLucrareImage(p.before),
     after: await resolveLucrareImage(p.after),
   })),
 );
-const resolvedGallery = await Promise.all(gallery.map((g) => resolveLucrareImage(g)));
+// WR-02/WR-03: keep the ORIGINAL frontmatter path beside each resolved image so alt-text
+// is keyed off the curated stem (which we control) and not the hashed astro:assets output
+// `src` (which can change and silently drop all curated alts → a11y/AEO regression).
+const resolvedGallery = await Promise.all(
+  gallery.map(async (g) => ({ img: await resolveLucrareImage(g), path: g })),
+);
 
 // BreadcrumbList JSON-LD (SEO-05) matching the breadcrumb DOM below. The final
 // crumb (current page) has no `url`, so breadcrumbList emits no `item` for it.
@@ -62,24 +77,26 @@ const dateLabel = new Intl.DateTimeFormat('ro-RO', {
   month: 'long',
 }).format(date);
 
-// Factual ro-RO alt texts for the real D-11 gallery photos, keyed by filename
-// (02-UI-SPEC §Gallery alt-text guidance — describe what the photos actually show,
-// no invented specifics). Falls back to "{title} — fotografie {n}" for extras.
+// Factual ro-RO alt texts for the real D-11 gallery photos, keyed by the EXACT
+// frontmatter filename stem (02-UI-SPEC §Gallery alt-text guidance — describe what the
+// photos actually show, no invented specifics). WR-02: keyed by the curated stem we
+// control (e.g. `cluj-trepte-bordo`), NOT a loose substring of the hashed output `src`,
+// so a future filename or a change to Astro's asset naming can't mis-attribute or
+// silently drop alts. Falls back to "{title} — fotografie {n}" for genuine extras.
 const GALLERY_ALT: Record<string, string> = {
-  'trepte-bordo': 'Trepte renovate cu finisaj bordo și mână curentă vopsită',
-  'palier-vopsit': 'Palier proaspăt vopsit, pereți și tavan în alb',
-  'lambriu-vertical': 'Panou decorativ vertical din lambriu pe palier',
-  'usi-acces': 'Zona ușilor de acces la apartamente, după renovare',
-  'corp-iluminat': 'Corp de iluminat montat pe tavanul renovat',
+  'cluj-trepte-bordo': 'Trepte renovate cu finisaj bordo și mână curentă vopsită',
+  'cluj-palier-vopsit': 'Palier proaspăt vopsit, pereți și tavan în alb',
+  'cluj-lambriu-vertical': 'Panou decorativ vertical din lambriu pe palier',
+  'cluj-usi-acces': 'Zona ușilor de acces la apartamente, după renovare',
+  'cluj-corp-iluminat': 'Corp de iluminat montat pe tavanul renovat',
 };
 
-const galleryAlt = (img: { src: string }, i: number): string => {
-  // <Picture> src points at the optimized asset; the original filename stem is
-  // embedded in it (e.g. ".../trepte-bordo.<hash>.webp"). Match on the stem.
-  for (const [key, alt] of Object.entries(GALLERY_ALT)) {
-    if (img.src.includes(key)) return alt;
-  }
-  return `${title} — fotografie ${i + 1}`;
+// WR-02/WR-03: derive the alt from the ORIGINAL frontmatter path stem (exact match on
+// the curated key), not the hashed astro:assets output `src`. A genuine "extra" photo
+// with no mapped alt still gets a sensible numbered fallback.
+const galleryAlt = (path: string, i: number): string => {
+  const stem = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+  return GALLERY_ALT[stem] ?? `${title} — fotografie ${i + 1}`;
 };
 ---
 
@@ -114,15 +131,15 @@ const galleryAlt = (img: { src: string }, i: number): string => {
         </section>
       ) : (
         <ul class="gallery" aria-label="Galerie foto — lucrarea finalizată">
-          {resolvedGallery.map((img, i) => (
+          {resolvedGallery.map((g, i) => (
             <li class="gallery__item">
               <Picture
-                src={img}
+                src={g.img}
                 formats={['avif', 'webp']}
                 widths={[400, 800, 1200]}
                 sizes="(max-width: 768px) 100vw, 50vw"
                 loading={i === 0 ? 'eager' : 'lazy'}
-                alt={galleryAlt(img, i)}
+                alt={galleryAlt(g.path, i)}
               />
             </li>
           ))}
