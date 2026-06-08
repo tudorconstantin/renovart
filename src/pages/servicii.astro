@@ -7,7 +7,7 @@
 // styles use inherited tokens only (no new custom properties). Zero new JS.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { business } from '../data/business';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import { homeAndConstructionBusiness, serviceSchema } from '../data/schema';
 import JsonLd from '../components/JsonLd.astro';
 
@@ -16,6 +16,9 @@ import JsonLd from '../components/JsonLd.astro';
 // serviceSchema() so the visible blocks and the Service JSON-LD cannot drift
 // (D-10, Pitfall 3). icon stays a fixed enum constrained in content.config.ts.
 const services = (await getCollection('servicesCopy')).map((e) => e.data);
+
+// Page chrome (h1, lead, closing CTA copy + labels) from the editable singleton.
+const servicii = (await getEntry('serviciiCopy', 'main'))!.data;
 
 // SEO-04: emit a @graph so the Service's provider @id resolves locally for
 // validators (RESEARCH Pitfall 5). Business node + Service node share one
@@ -48,12 +51,8 @@ const fallbackIcon = 'M12 2l3 7h7l-5.5 4 2 7-6.5-4.3L5.5 22l2-7L2 9h7l3-7z';
 
   <div class="page">
     <div class="intro">
-      <h1>Servicii</h1>
-      <p class="lead">
-        Renovăm complet casa scării blocurilor din Cluj-Napoca și împrejurimi.
-        Mai jos găsiți, pe scurt, ce includem într-o lucrare — de la zugrăveli
-        până la hidroizolații.
-      </p>
+      <h1>{servicii.headline}</h1>
+      <p class="lead">{servicii.lead}</p>
     </div>
 
     <ul class="grid" role="list">
@@ -81,11 +80,8 @@ const fallbackIcon = 'M12 2l3 7h7l-5.5 4 2 7-6.5-4.3L5.5 22l2-7L2 9h7l3-7z';
     </ul>
 
     <section class="closing" aria-labelledby="cta-heading">
-      <h2 id="cta-heading">Discutăm despre scara dumneavoastră?</h2>
-      <p class="closing__lead">
-        Sunați sau scrieți-ne pe WhatsApp — vă răspundem rapid și stabilim o
-        evaluare la fața locului, cu deviz clar.
-      </p>
+      <h2 id="cta-heading">{servicii.closingHeading}</h2>
+      <p class="closing__lead">{servicii.closingLead}</p>
 
       <div class="cta-cluster">
         <a
@@ -99,7 +95,7 @@ const fallbackIcon = 'M12 2l3 7h7l-5.5 4 2 7-6.5-4.3L5.5 22l2-7L2 9h7l3-7z';
               fill="currentColor"
             />
           </svg>
-          <span>Sună</span>
+          <span>{servicii.ctaCallLabel}</span>
         </a>
 
         <a
@@ -113,7 +109,7 @@ const fallbackIcon = 'M12 2l3 7h7l-5.5 4 2 7-6.5-4.3L5.5 22l2-7L2 9h7l3-7z';
               fill="currentColor"
             />
           </svg>
-          <span>WhatsApp</span>
+          <span>{servicii.ctaWaLabel}</span>
         </a>
       </div>
     </section>

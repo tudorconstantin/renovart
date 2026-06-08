@@ -19,6 +19,7 @@ import { homeAndConstructionBusiness, faqPageSchema } from '../data/schema';
 // Phase 5: editable copy from the JSON-backed collections (single source for
 // DOM + JSON-LD, no drift — D-10). Read each ONCE into a const (Pitfall 3).
 // serviceAreaLabel stays derived from business.serviceArea (NAP single-source).
+const home = (await getEntry('homeCopy', 'main'))!.data; // hero + section chrome + steps + closing CTA
 const faq = (await getCollection('faqCopy')).map((e) => e.data);
 const services = (await getCollection('servicesCopy')).map((e) => e.data);
 const trust = (await getEntry('trustCopy', 'main'))!.data;
@@ -39,13 +40,8 @@ const graph = {
   '@graph': [homeAndConstructionBusiness(), faqPageSchema(faq)],
 };
 
-// "Cum lucrăm" condensed teaser steps (full process lives on /despre).
-const steps = [
-  { name: 'Evaluare și deviz', text: 'Venim la fața locului, măsurăm și întocmim un deviz clar și gratuit.' },
-  { name: 'Planificare', text: 'Stabilim etapele și termenele, agreate cu asociația dinainte.' },
-  { name: 'Execuție', text: 'Lucrăm organizat, cu accesul locatarilor afectat cât mai puțin.' },
-  { name: 'Predare și garanție', text: 'Predăm lucrarea cu proces-verbal și garanție scrisă.' },
-];
+// "Cum lucrăm" condensed teaser steps now live in home.json (CMS-editable).
+const steps = home.steps;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -54,13 +50,9 @@ const steps = [
   <div class="home">
     <!-- 1. Hero -->
     <section class="hero" aria-labelledby="hero-title">
-      <p class="eyebrow">{business.serviceArea}</p>
-      <h1 id="hero-title">Renovăm scări de bloc, profesional și fără bătăi de cap</h1>
-      <p class="lead">
-        {business.name} renovează scările blocurilor din Cluj-Napoca pentru
-        asociații de proprietari și administratori de bloc — lucrări curate,
-        la termen și cu rezultate care se văd.
-      </p>
+      <p class="eyebrow">{home.eyebrow}</p>
+      <h1 id="hero-title">{home.headline}</h1>
+      <p class="lead">{home.lead}</p>
 
       <div class="cta-cluster">
         <a
@@ -74,7 +66,7 @@ const steps = [
               fill="currentColor"
             />
           </svg>
-          <span>Sună</span>
+          <span>{home.ctaCallLabel}</span>
         </a>
 
         <a
@@ -88,15 +80,15 @@ const steps = [
               fill="currentColor"
             />
           </svg>
-          <span>WhatsApp</span>
+          <span>{home.ctaWaLabel}</span>
         </a>
       </div>
     </section>
 
     <!-- 2. Services summary -->
     <section class="block" aria-labelledby="servicii-title">
-      <h2 id="servicii-title">Ce facem</h2>
-      <p>Ne ocupăm de tot ce ține de renovarea casei scării:</p>
+      <h2 id="servicii-title">{home.servicesHeading}</h2>
+      <p>{home.servicesIntro}</p>
       <ul class="list list--services">
         {services.map((s) => <li>{s.title}</li>)}
       </ul>
@@ -107,7 +99,8 @@ const steps = [
 
     <!-- 3. Trust-stats band -->
     <section class="block block--surface" aria-labelledby="incredere-title">
-      <h2 id="incredere-title">De ce ne aleg administratorii</h2>
+      <h2 id="incredere-title">{home.trustHeading}</h2>
+      <p>{home.trustIntro}</p>
       <dl class="stats">
         <div class="stat">
           <dt class="stat__label">Ani de experiență</dt>
@@ -128,7 +121,7 @@ const steps = [
     {
       featured.length > 0 && (
         <section class="block" aria-labelledby="lucrari-recente">
-          <h2 id="lucrari-recente">Lucrări recente</h2>
+          <h2 id="lucrari-recente">{home.featuredHeading}</h2>
           <ul class="grid" role="list">
             {featured.map((entry) => (
               <li>
@@ -145,7 +138,7 @@ const steps = [
 
     <!-- 5. "Cum lucrăm" teaser -->
     <section class="block" aria-labelledby="cum-lucram">
-      <h2 id="cum-lucram">Cum lucrăm</h2>
+      <h2 id="cum-lucram">{home.stepsHeading}</h2>
       <ol class="steps">
         {
           steps.map((step) => (
@@ -166,8 +159,8 @@ const steps = [
 
     <!-- 7. Closing CTA -->
     <section class="block" aria-labelledby="contact-title">
-      <h2 id="contact-title">Aveți o scară de bloc de renovat?</h2>
-      <p>Sunați-ne sau scrieți-ne pe WhatsApp — vă răspundem rapid și venim pentru un deviz gratuit.</p>
+      <h2 id="contact-title">{home.closingHeading}</h2>
+      <p>{home.closingLead}</p>
       <div class="cta-cluster">
         <a
           class="apply-btn apply-btn--call"
@@ -180,7 +173,7 @@ const steps = [
               fill="currentColor"
             />
           </svg>
-          <span>Sună</span>
+          <span>{home.ctaCallLabel}</span>
         </a>
 
         <a
@@ -194,7 +187,7 @@ const steps = [
               fill="currentColor"
             />
           </svg>
-          <span>WhatsApp</span>
+          <span>{home.ctaWaLabel}</span>
         </a>
       </div>
     </section>
