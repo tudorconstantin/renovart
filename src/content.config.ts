@@ -109,4 +109,47 @@ const trustCopy = defineCollection({
   }),
 });
 
-export const collections = { lucrari, faqCopy, servicesCopy, trustCopy };
+// homeCopy — object format → single entry keyed `main`. The Home page chrome
+// (hero + section headings/intros + "Cum lucrăm" steps + closing CTA) the owner
+// edits via Pages CMS. `.max()` caps mirror the UI-SPEC HARD limits so an
+// egregious edit fails `astro build` (fail-closed, T-05-04), while the visible
+// copy stays the SINGLE source the DOM renders.
+const homeCopy = defineCollection({
+  loader: file('src/data/copy/home.json'),
+  schema: z.object({
+    eyebrow: z.string().max(40),
+    headline: z.string().max(60),
+    lead: z.string().max(220),
+    servicesHeading: z.string().max(60),
+    servicesIntro: z.string().max(300),
+    trustHeading: z.string().max(60),
+    trustIntro: z.string().max(300),
+    featuredHeading: z.string().max(60),
+    stepsHeading: z.string().max(60),
+    steps: z
+      .array(z.object({ name: z.string().max(30), text: z.string().max(160) }))
+      .min(3)
+      .max(4),
+    closingHeading: z.string().max(60),
+    closingLead: z.string().max(300),
+    ctaCallLabel: z.string().max(12),
+    ctaWaLabel: z.string().max(12),
+  }),
+});
+
+// serviciiCopy — object format → single entry keyed `main`. The Servicii page
+// chrome (h1, lead, closing CTA copy + labels). The six service blocks
+// themselves come from `servicesCopy` (Plan 01), fed once to both DOM + JSON-LD.
+const serviciiCopy = defineCollection({
+  loader: file('src/data/copy/servicii.json'),
+  schema: z.object({
+    headline: z.string().max(60),
+    lead: z.string().max(300),
+    closingHeading: z.string().max(60),
+    closingLead: z.string().max(300),
+    ctaCallLabel: z.string().max(12),
+    ctaWaLabel: z.string().max(12),
+  }),
+});
+
+export const collections = { lucrari, faqCopy, servicesCopy, trustCopy, homeCopy, serviciiCopy };

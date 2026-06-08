@@ -1,0 +1,35 @@
+{
+  "main": {
+    "eyebrow": "Cluj-Napoca și împrejurimi",
+    "headline": "Scări de bloc renovate, curate și gata la timp",
+    "lead": "Renovăm complet casa scării pentru asociații și administratori — iar curățenia după lucrare este inclusă gratuit, de fiecare dată. Deviz gratuit, fără obligații.",
+    "servicesHeading": "Ce facem",
+    "servicesIntro": "Ne ocupăm de tot ce ține de renovarea casei scării — de la zugrăveli și trepte până la balustrade, uși, instalații electrice și hidroizolații. O singură firmă pentru toată lucrarea, fără să alergați după mai mulți meșteri.",
+    "trustHeading": "De ce ne aleg administratorii",
+    "trustIntro": "Curățenie inclusă gratuit la fiecare lucrare, prețuri competitive și termene scurte. Lucrăm direct cu asociația de proprietari, cu comunicare clară și modalități de plată flexibile.",
+    "featuredHeading": "Lucrări recente",
+    "stepsHeading": "Cum lucrăm",
+    "steps": [
+      {
+        "name": "Evaluare și deviz gratuit",
+        "text": "Venim la fața locului, măsurăm și întocmim un deviz clar, gratuit și fără obligații."
+      },
+      {
+        "name": "Planificare cu asociația",
+        "text": "Stabilim etapele, termenele și modalitățile de plată, agreate dinainte cu asociația."
+      },
+      {
+        "name": "Execuție organizată",
+        "text": "Lucrăm ordonat, cu termene scurte și cu accesul locatarilor afectat cât mai puțin."
+      },
+      {
+        "name": "Curățenie și predare",
+        "text": "Facem curățenie inclusă gratuit și predăm scara cu proces-verbal și garanție scrisă."
+      }
+    ],
+    "closingHeading": "Aveți o scară de bloc de renovat?",
+    "closingLead": "Sunați-ne sau scrieți-ne pe WhatsApp — vă răspundem rapid și venim pentru un deviz gratuit, fără obligații.",
+    "ctaCallLabel": "Sună",
+    "ctaWaLabel": "WhatsApp"
+  }
+}
