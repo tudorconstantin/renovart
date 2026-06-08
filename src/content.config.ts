@@ -126,8 +126,12 @@ const homeCopy = defineCollection({
     trustIntro: z.string().max(300),
     featuredHeading: z.string().max(60),
     stepsHeading: z.string().max(60),
+    // WR-04: step-text cap unified with despreCopy.steps[].text (both 300). The two
+    // "Cum lucrăm" step editors render visually-identical UI, so they enforce ONE
+    // limit — an editor copying step text between Home and Despre gets consistent
+    // build behavior. The `.pages.yml` help text for both step editors states "~300".
     steps: z
-      .array(z.object({ name: z.string().max(30), text: z.string().max(160) }))
+      .array(z.object({ name: z.string().max(30), text: z.string().max(300) }))
       .min(3)
       .max(4),
     closingHeading: z.string().max(60),

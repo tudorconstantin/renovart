@@ -226,7 +226,7 @@ content:
               - name: text
                 label: Descriere pas
                 type: text
-                description: 'Maxim ~160 de caractere.'
+                description: 'Maxim ~300 de caractere.'
           - name: closingHeading
             label: Titlu secțiune finală (CTA)
             type: string
